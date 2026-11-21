@@ -1,0 +1,155 @@
+Progetto linguistica 2024        2
+Prima parte        2
+Le librerie utilizzate        2
+Il dataset        2
+Analisi linguistica        4
+Analisi della distribuzione dei testi        6
+Parte due        9
+Classificazione multi-label        10
+________________
+
+
+
+
+Progetto linguistica 2024 
+Prima parte 
+
+
+Le librerie utilizzate 
+Inizio con l’installazione di tutte le librerie che mi saranno utili per l’esplorazione linguistica del dataset.
+Inizio con la libreria datasets, la quale mi permette di scaricare con facilità il dataset e di effettuare dei passaggi di preprocessing (cioè di sistemazione dei dati).
+La libreria sentence-transformers invece mi permette di creare embeddings dei testi presi in considerazione. 
+La libreria pandas servirà invece per effettuare analisi di dati, così come l’argmax di numpy. 
+Il DataFrame di Pandas ci permette di creare una struttura a due dimensioni (o un array a due dimensioni).
+Spacy è una libreria open-source per Natural Language processing, ci permette di analizzare testi molto ampi in estrema velocità. Può essere usata in varie lingue, ma in questo caso la addotteremo per la lingua inglese (visto il dataset).
+
+
+NLTK è un’altra libreria utilizzata per il Natural Language Processing, che ci servirà per dei passaggi specifici. 
+
+
+Il dataset 
+Il dataset preso in esame per questo progetto è il “go-emotion” di hugging face. E’ un dataset in lingua inglese di 58 mila commenti su Reddit classificati per 27 tipi di emozioni diverse o come neutrali. Il dataset si predispone per una classificazione emozionale multi-classe e multi-label. 
+Il dataset nello specifico è composto da un DatasetDict (classe che ci permette di creare un dizionario dei dati) in cui troviamo la suddivisione in “train”, “validation” e “test” e a cui vengono fatti corrispondere i vari esempi, suddivisi in “text”, “labels”, “id” (codice identificativo dei sample).
+   
+
+
+Le etichette sono le seguenti:
+ class_label:
+            names:
+              '0': admiration
+              '1': amusement
+              '2': anger
+              '3': annoyance
+              '4': approval
+              '5': caring
+              '6': confusion
+              '7': curiosity
+              '8': desire
+              '9': disappointment
+              '10': disapproval
+              '11': disgust
+              '12': embarrassment
+              '13': excitement
+              '14': fear
+              '15': gratitude
+              '16': grief
+              '17': joy
+              '18': love
+              '19': nervousness
+              '20': optimism
+              '21': pride
+              '22': realization
+              '23': relief
+              '24': remorse
+              '25': sadness
+              '26': surprise
+              '27': neutral
+
+
+Avendo riscontrato delle difficoltà nella computazione, ho deciso di ridurre la dimensione del dataset. Selezionando una parte dei samples, cercando di mantenere una proporzione adeguata tra “train” e “validation” e “test”.
+Vado così selezionando 26046 samples che assegnerò alla parte di training e 1086 samples per le restanti parti (test e validation).
+
+
+Analisi linguistica
+In questa prima parte mi occuperò di analizzare a livello linguistico il dataset (in questo caso prenderò in considerazione solo le prime mille occorrenze nel dataset).
+Inizio quindi istanziando la funzione nlp sul testo, così da poter essere analizzato attraverso la libreria Spacy. Con questo tool, infatti, possiamo effettuare le stesse analisi che si possono effettuare con la libreria NLTK, ma in modo più veloce ed intuitivo.
+La funzione nlp ci permette di convertire l’intero testo in un documento fruibile dalla libreria. Effettuando una tokenizzazione con il tokenizzatore di Spacy , il numero dei token è di 18024. Infatti, spacy considera i token dividendoli attraverso gli spazi. 
+Se proviamo invece ad effettuare una tokenizzazione con il tokenizzatore di nltk, il word_tokenize, la lunghezza è di 17495. Il word_tokenize tokenizza separatamente la punteggiatura. 
+Effettuo la pulizia del testo, rimuovendo le stopwords (contenute nella libreria di Spacy e quindi facilmente consultabili), eliminando le maiuscole, eventuali segni di punteggiatura e spazi.
+Il testo così si presenta notevolmente ridotto: passiamo da una iniziale lunghezza di 69903 tokens ad una di 12938 tokens. 
+Attraverso la libreria Collection usufruiamo della classe Counter che sfrutteremo per estrapolare dal testo le 10 parole più comuni, le quali ovviamente non ci danno nessuna informazione particolare. Scelgo così di estrapolare le prime 10 parole uniche:
+['favourite', 'cook', 'screwing', 'bayless', 'isoing', 'threatened', 'dirty', 'southern', 'wankers', 'peyton']
+
+
+
+
+
+Converto queste parole attraverso la funzione nlp e attraverso una funzione richiamo di ognuna di queste parole il testo, l’indice di inizio, il tag riferito alla part of speech e la part of speech assegnata.
+favourite 2 JJ ADJ favourite Degree=Pos 
+cook 15 NN NOUN cook Number=Sing 
+screwing 23 VBG VERB screw Aspect=Prog|Tense=Pres|VerbForm=Part 
+bayless 35 NN NOUN bayless Number=Sing 
+isoing 46 VBG VERB isoe Aspect=Prog|Tense=Pres|VerbForm=Part
+threatened 56 VBN VERB threaten Aspect=Perf|Tense=Past|VerbForm=Part 
+dirty 70 JJ ADJ dirty Degree=Pos 
+southern 79 JJ ADJ southern Degree=Pos 
+wankers 91 NNS NOUN wanker Number=Plur 
+peyton 102 JJ ADJ peyton Degree=Pos
+
+
+Adesso invece sfruttiamo la libreria NLTK per fare un’analisi di tipo più profondo. Con il database WordNet possiamo infatti analizzare i testi a livello lessicale, comprendendone la struttura gerarchica in termine di sinonimi e contrari e così via.
+Richiamo quindi della parola “favourite” tutti i sinonimi associati, con la definizione ed un esempio di utilizzo. 
+  
+
+Un’altra ricerca che effettuo sul testo è detta NER (Name Entity Recognition), in questo caso ci viene restituito un numero elevato di entità (409).
+
+
+Analisi della distribuzione dei testi 
+Nella seconda parte di questa analisi linguistica ho cercato di rispondere ad alcuni quesiti: Qual è la distribuzione dei testi rispetto alle etichette?
+Qual è la distribuzione degli aggettivi e avverbi per le varie etichette?
+Per rispondere alla prima domanda, dunque, formulo una funzione che mi permette di creare un dizionario in cui abbiamo come chiave l’etichetta e come valore il numero di testi corrispondenti. 
+  
+
+
+
+Noto da subito che la distribuzione non è omogenea. Per rispondere al secondo quesito, decido di prendere in considerazione le 10 etichette con più testi assegnati e di confrontare 5 sentimenti positivi con 5 sentimenti negativi. 
+Scelgo i seguenti: annoyance, gratitude, amusement, approval, curiosity, love, disapproval, anger, confusion e disappointment.
+Inizio scrivendo una funzione che mi permette di creare una lista con tutti i testi relativi alle etichette scelte e successivamente scrivo una funzione che mi permette di creare un dizionario in cui scorrendo le varie parole dei testi, effettuiamo il conteggio delle part of speech e le liste di aggettivi e avverbi. 
+Richiamo quindi la funzione per i vari testi. 
+Successivamente raccolgo in un dizionario il numero di aggettivi e avverbi per ogni testo.
+   
+
+
+Per avere una visione più chiara ed immediata dei risultati converto il tutto in array attraverso la funzione array della libreria numpy. 
+Successivamente imposto i parametri per la costruzione di un grafico attraverso la libreria matplotlib. 
+  
+
+Da questo grafico a barre possiamo quindi, vedere che la distribuzione tra aggettivi e avverbi ha un rapporto stabile nei vari testi. 
+Ho voluto aggiungere un altro grafico in cui viene invece analizzata la distribuzione di alcuni pos (quelli che considero principali), in modo da evidenziare eventuali differenze di distribuzione. 
+  
+
+In questo grafico abbiamo la distribuzione, oltre che di aggettivi ed avverbi, di nomi e verbi. I nomi, come prevedibile, costituiscono la parte preponderante dei testi, seguiti dai verbi. La distribuzione di aggettivi e avverbi segue, inevitabilmente, quella dei nomi e dei verbi in termini di grandezza, ma notiamo che il rapporto non è costante. 
+Sommando aggettivi ed avverbi, nomi e verbi, notiamo che di media abbiamo un rapporto di 2,3-2,2 nella maggior parte dei testi. Ma riscontriamo anche un rapporto di 2,9 per i testi con label 18 (love), il quale dimostra un forte calo della presenza di aggettivi ed avverbi rispetto alla presenza di nomi e verbi; per il testo di label 2 (anger) troviamo un rapporto di 2,6. 
+Per quanto riguarda la label 9 (disappointment) troviamo, invece, un rapporto di 1,8. 
+________________
+
+
+Parte due
+Classificazione multi-label
+Nella parte iniziale del progetto troviamo l’installazione delle varie librerie utili. 
+Anche in questo caso utilizziamo datasets, sentence-transformers, numpy, pandas. 
+Scarichiamo il dataset che è composto nel modo precedentemente spiegato. 
+Definiamo il nostro dataset prendendo in considerazione solo la parte di dataset[“train”]
+che a sua volta divideremo in train e test grazie alla classe train_test_split della libreria sklearn.model_selection che ci permette di fare una distribuzione casuale dei samples.
+Ci ritroviamo quindi con la sezione di train di lunghezza 32557 e la sezione di test di 10853.
+Scarichiamo il modello che utilizzeremo per l’addestramento, in questo caso “distiluse-base-multilingual-cased-v1" adatto a task come clustering e ricerca semantica.
+Visto che stiamo trattando un dataset ai cui testi vediamo assegnate più label, adotteremo il Onehot Encoder della libreria  sklearn. 
+Il OneHotEncoder prende come input un array di numeri interi o stringhe, gestisce le etichette creando una colonna binaria per ogni categoria e restituisce una matrice o un array. 
+Dopo quindi aver convertito il dataframe contenente le etichette in stringhe (supportate dal onehot encoder), utiliziamo il onehot encoder che ci restituisce una matrice. 
+Adesso passiamo alla creazione degli embeddings. Gli embeddings costituiscono il mezzo attraverso cui è possibile rendere i testi comprensibili per i modelli di machine learning. I testi vengono, infatti, tradotti in input numerici (vettorizzazione) i quali riescono a contenere informazioni importanti relative ai testi. 
+Adotteremo il MLP Classifier (multi-layer perceptron classifier) per l’addestramento, che verrà eseguito sulla base dei testi e delle etichette date in input. Una volta completato l’addestramento utilizzeremo il modello sulla parte del dataset preposta al test. 
+È necessario che il modello abbia come input i vettori sia della parte testuale che della parte relativa alle etichette.
+Grazie al modulo metrics di sklearn, adottiamo la funzione classification_report che ci dà un report di tutte le principali metriche di classificazione. 
+In questo caso f1, precision, recall.  
+I dati in questo caso risultano particolarmente deludenti.  La macroaverage della precision (primo risultato) è molto bassa, possiamo dedurne che la precision media fra le classi è molto bassa a sua volta. Anche la microaverage della precision, che è la raccolta delle predizioni in una matrice di confusione su cui viene poi effettuato il calcolo di recall e precision, risulta bassa. 
+Probabilmente viste le numerose label (27) sono presenti pochi esempi nel dataset che viene processato dal modello addestrato.
